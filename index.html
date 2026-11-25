@@ -5,16 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Specbot</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
   <style>
     :root {
       --bg: #131314;
       --sidebar: #1e1f20;
       --surface: #1e1f20;
-      --surface-hover: #282a2c;
+      --surface-elevated: #26282b;
+      --surface-hover: #2c2e31;
       --border: #333537;
       --text: #e3e3e3;
+      --text-strong: #ffffff;
       --muted: #9aa0a6;
       --accent: #a8c7fa;
+      --accent-soft: rgba(168, 199, 250, 0.12);
       --accent-bg: #004a77;
       --danger: #f28b82;
     }
@@ -91,13 +96,13 @@
     }
 
     .sidebar {
-      width: 270px;
+      width: 272px;
       background: var(--sidebar);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       padding: 16px 14px;
-      gap: 16px;
+      gap: 18px;
       flex-shrink: 0;
     }
 
@@ -120,13 +125,13 @@
     }
 
     .section-label {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       color: var(--muted);
       margin-bottom: 8px;
-      padding-left: 4px;
+      padding-left: 6px;
     }
 
     .skill-list {
@@ -226,11 +231,11 @@
 
     .topbar {
       height: 56px;
-      padding: 0 20px;
+      padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .topbar-title {
@@ -244,9 +249,10 @@
     .active-badge {
       font-size: 12px;
       color: var(--accent);
-      background: rgba(168, 199, 250, 0.1);
-      padding: 3px 10px;
+      background: var(--accent-soft);
+      padding: 4px 11px;
       border-radius: 999px;
+      font-weight: 500;
     }
 
     .menu-toggle {
@@ -262,24 +268,24 @@
     .messages {
       flex: 1;
       overflow-y: auto;
-      padding: 28px 20px;
+      padding: 28px 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
       scroll-behavior: smooth;
     }
 
     .messages-inner {
       width: 100%;
-      max-width: 780px;
+      max-width: 800px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .greeting {
-      margin: 48px auto 12px;
+      margin: 56px auto 12px;
       text-align: center;
       max-width: 540px;
       animation: fadeIn 0.35s ease;
@@ -303,12 +309,12 @@
     .msg-row {
       display: flex;
       flex-direction: column;
-      animation: fadeIn 0.22s ease;
+      animation: fadeIn 0.24s ease;
     }
 
     .msg-user {
       align-self: flex-end;
-      max-width: 80%;
+      max-width: 82%;
       background: #282a2c;
       color: var(--text);
       padding: 12px 18px;
@@ -319,14 +325,126 @@
       word-break: break-word;
     }
 
+    /* Rich Markdown styling for Bot responses */
     .msg-bot {
       align-self: flex-start;
       width: 100%;
-      padding: 4px 0;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .msg-bot > *:first-child { margin-top: 0; }
+    .msg-bot > *:last-child { margin-bottom: 0; }
+
+    .msg-bot p {
+      margin: 0 0 12px;
+    }
+
+    .msg-bot h1, .msg-bot h2, .msg-bot h3, .msg-bot h4 {
+      color: var(--text-strong);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 22px 0 10px;
+      line-height: 1.35;
+    }
+
+    .msg-bot h2 {
+      font-size: 18px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .msg-bot h3 {
+      font-size: 16px;
+      color: #d3e3fd;
+    }
+
+    .msg-bot strong {
+      color: var(--text-strong);
+      font-weight: 600;
+    }
+
+    .msg-bot hr {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin: 18px 0;
+    }
+
+    .msg-bot ul, .msg-bot ol {
+      margin: 8px 0 14px;
+      padding-left: 22px;
+    }
+
+    .msg-bot li {
+      margin-bottom: 7px;
+      padding-left: 2px;
+    }
+
+    .msg-bot li::marker {
+      color: var(--accent);
+    }
+
+    /* Script / Copy-ready callout blocks */
+    .msg-bot blockquote {
+      margin: 12px 0 16px;
+      padding: 13px 16px;
+      background: var(--surface-elevated);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px 14px 14px 6px;
+      color: #f1f3f4;
       font-size: 14.5px;
       line-height: 1.65;
-      white-space: pre-wrap;
-      word-break: break-word;
+    }
+
+    .msg-bot blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Tables for Technical Specs */
+    .msg-bot table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13.5px;
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .msg-bot th, .msg-bot td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .msg-bot th {
+      background: #282a2c;
+      color: var(--text-strong);
+      font-weight: 600;
+    }
+
+    .msg-bot tr:last-child td {
+      border-bottom: none;
+    }
+
+    .msg-bot code {
+      background: #282a2c;
+      color: #d3e3fd;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .msg-bot a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .msg-bot a:hover {
+      text-decoration: underline;
     }
 
     .msg-error {
@@ -339,18 +457,19 @@
     }
 
     .msg-actions {
-      margin-top: 6px;
+      margin-top: 10px;
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .copy-btn {
-      border: none;
-      background: transparent;
+      border: 1px solid var(--border);
+      background: var(--surface);
       color: var(--muted);
       font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 8px;
+      padding: 5px 11px;
+      border-radius: 999px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -358,6 +477,7 @@
     .copy-btn:hover {
       color: var(--text);
       background: var(--surface-hover);
+      border-color: #4a4d50;
     }
 
     .dots {
@@ -389,11 +509,11 @@
 
     /* Input bar */
     .composer-wrap {
-      padding: 0 20px 22px;
+      padding: 0 24px 22px;
     }
 
     .composer-box {
-      max-width: 780px;
+      max-width: 800px;
       margin: 0 auto;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -434,7 +554,7 @@
       color: #062e6f;
       font-weight: 600;
       font-size: 13.5px;
-      padding: 9px 16px;
+      padding: 9px 18px;
       border-radius: 999px;
       cursor: pointer;
       transition: transform 0.15s ease, opacity 0.15s ease;
@@ -545,6 +665,20 @@
   </div>
 
   <script>
+    if (window.marked) {
+      marked.setOptions({ breaks: true, gfm: true });
+    }
+
+    function renderRichMarkdown(rawText) {
+      if (window.marked && window.DOMPurify) {
+        const parsed = marked.parse(rawText);
+        return DOMPurify.sanitize(parsed);
+      }
+      const div = document.createElement("div");
+      div.textContent = rawText;
+      return div.innerHTML;
+    }
+
     const state = {
       user: null,
       skill: "full_presales",
@@ -610,7 +744,6 @@
           setTimeout(render, 120);
           return;
         }
-        // Fetch public client id from a lightweight check or pass via meta/endpoint if needed
         fetch("/api/auth/config")
           .then((r) => r.json())
           .then(({ clientId }) => {
@@ -724,22 +857,47 @@
       row.className = "msg-row";
       const bubble = document.createElement("div");
       bubble.className = isError ? "msg-error" : "msg-bot";
-      bubble.textContent = text;
+
+      if (isError) {
+        bubble.textContent = text;
+      } else {
+        bubble.innerHTML = renderRichMarkdown(text);
+      }
+
       row.appendChild(bubble);
 
       if (!isError) {
         const actions = document.createElement("div");
         actions.className = "msg-actions";
-        const copyBtn = document.createElement("button");
-        copyBtn.type = "button";
-        copyBtn.className = "copy-btn";
-        copyBtn.textContent = "Copier";
-        copyBtn.addEventListener("click", async () => {
-          await navigator.clipboard.writeText(text);
-          copyBtn.textContent = "Copié ✓";
-          setTimeout(() => (copyBtn.textContent = "Copier"), 1400);
+
+        const copyAllBtn = document.createElement("button");
+        copyAllBtn.type = "button";
+        copyAllBtn.className = "copy-btn";
+        copyAllBtn.textContent = "Copier toute la réponse";
+        copyAllBtn.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(bubble.innerText);
+          copyAllBtn.textContent = "Copié ✓";
+          setTimeout(() => (copyAllBtn.textContent = "Copier toute la réponse"), 1400);
         });
-        actions.appendChild(copyBtn);
+        actions.appendChild(copyAllBtn);
+
+        const quotes = Array.from(bubble.querySelectorAll("blockquote"))
+          .map((q) => q.innerText.trim())
+          .filter((t) => t && !t.startsWith("ManoMano © 2026"));
+
+        if (quotes.length > 0) {
+          const copyClientBtn = document.createElement("button");
+          copyClientBtn.type = "button";
+          copyClientBtn.className = "copy-btn";
+          copyClientBtn.textContent = "Copier uniquement le script client";
+          copyClientBtn.addEventListener("click", async () => {
+            await navigator.clipboard.writeText(quotes.join("\n\n"));
+            copyClientBtn.textContent = "Script client copié ✓";
+            setTimeout(() => (copyClientBtn.textContent = "Copier uniquement le script client"), 1500);
+          });
+          actions.appendChild(copyClientBtn);
+        }
+
         row.appendChild(actions);
       }
 
