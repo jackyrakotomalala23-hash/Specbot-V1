@@ -1244,8 +1244,7 @@
   </div>
 
   <script>
-    const INACTIVITY_LIMIT_MS = 5 * 60 * 60 * 1000; // 5 heures d'inactivité
-    // Cadence progressive des boosts : 3min -> 4min -> 5min -> 10min -> 15min -> 20min (puis toutes les 20min)
+    const INACTIVITY_LIMIT_MS = 5 * 60 * 60 * 1000;
     const BOOST_SCHEDULE_MINUTES = [3, 4, 5, 10, 15, 20];
     let inactivityTimer = null;
     let boostTimeoutTimer = null;
@@ -1303,7 +1302,7 @@
       return "Agent";
     }
 
-    /* ~5,000+ words combinatory compliment base with emojis & typing animation */
+    /* Base combinatoire de compliments (~5 000+ mots avec emojis) */
     const COMPLIMENT_TRAITS = [
       "rayonnant(e), vif/vive d'esprit et incroyablement efficace 🌟✨",
       "solaire, précis(e) et prêt(e) à transformer chaque échange en réussite 🔥🚀",
