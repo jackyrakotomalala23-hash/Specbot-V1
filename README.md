@@ -56,9 +56,9 @@
 * **`GOOGLE_CLIENT_ID` :**
   `Sensitive information`
 * **`SESSION_SECRET` :**
-  `lhd9zVhiJ9c352lhAU0+LQHCAwKn68fHTU/3SM5s3P1NcUfx68XP1GXlObqZAWLV`
+  `Sensitive information`
 * **`ADMIN_EMAIL` :**
-  `jacky.rakotomalala23@gmail.com`
+  `Sensitive information`
 * **`ALLOWED_EMAILS` :**
   `Sensitive information`
 
