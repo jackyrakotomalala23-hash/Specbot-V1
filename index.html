@@ -663,11 +663,83 @@
       gap: 24px;
     }
 
-    .greeting {
-      margin: 40px auto 10px;
-      text-align: center;
-      max-width: 620px;
+    /* Personalized Compliment Intro Card right above Greeting */
+    .welcome-stack {
+      margin: 24px auto 10px;
+      width: 100%;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
       animation: riseIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .intro-compliment-card {
+      position: relative;
+      padding: 18px 22px;
+      border-radius: 22px;
+      border: 1.5px solid transparent;
+      background:
+        linear-gradient(135deg, var(--surface) 0%, var(--surface-elevated) 100%) padding-box,
+        linear-gradient(125deg, rgba(96, 165, 250, 0.55), rgba(168, 85, 247, 0.55), rgba(236, 72, 153, 0.55)) border-box;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+      text-align: left;
+    }
+
+    .intro-compliment-lead {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+
+    .intro-compliment-strong {
+      font-weight: 600;
+      color: var(--text-strong);
+    }
+
+    .intro-compliment-dynamic {
+      font-weight: 600;
+      background: var(--gradient-title);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .intro-transition-row {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 13.5px;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    .refresh-compliment-btn {
+      font-style: normal;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .refresh-compliment-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--text-strong);
+    }
+
+    .greeting {
+      text-align: center;
     }
 
     .greeting h2 {
@@ -681,7 +753,7 @@
     }
 
     .greeting p {
-      margin: 0 0 24px;
+      margin: 0 0 22px;
       color: var(--muted);
       font-size: 14.5px;
       line-height: 1.5;
@@ -1126,13 +1198,30 @@
 
       <div class="messages" id="messagesScroll">
         <div class="messages-inner" id="messagesInner">
-          <div class="greeting" id="greetingBlock">
-            <h2 id="greetingHeadline">Bonjour, comment puis-je aider ?</h2>
-            <p>Colle un lien produit ManoMano, un EAN ou la question d'un client.</p>
-            <div class="quick-chips">
-              <button type="button" class="chip-btn" data-prompt="Le client hésite sur la puissance d'un radiateur électrique pour un salon de 25m² bien isolé.">Conseil puissance chauffage</button>
-              <button type="button" class="chip-btn" data-prompt="Le client trouve le produit trop cher par rapport à un concurrent, comment rassurer ?">Objection prix</button>
-              <button type="button" class="chip-btn" data-prompt="SPECS : donne-moi le tableau des caractéristiques techniques et prérequis d'installation.">Demande SPECS</button>
+          <div class="welcome-stack" id="greetingBlock">
+            <div class="intro-compliment-card">
+              <p class="intro-compliment-lead">
+                <span class="intro-compliment-strong">Avant de commencer, je voulais te dire :</span>
+                <span class="intro-compliment-strong" id="complimentFirstName">Agent</span>,
+                <span class="intro-compliment-strong">aujourd'hui tu es</span>
+                <span class="intro-compliment-dynamic typing-cursor" id="complimentPhraseText"></span><span class="intro-compliment-strong"> !</span>
+              </p>
+              <div class="intro-transition-row">
+                <span>Bon, passons aux choses sérieuses…</span>
+                <button type="button" class="refresh-compliment-btn" id="refreshComplimentBtn" title="Générer un autre compliment">
+                  ✨ Autre compliment
+                </button>
+              </div>
+            </div>
+
+            <div class="greeting">
+              <h2 id="greetingHeadline">Bonjour, comment puis-je aider ?</h2>
+              <p>Colle un lien produit ManoMano, un EAN ou la question d'un client.</p>
+              <div class="quick-chips">
+                <button type="button" class="chip-btn" data-prompt="Le client hésite sur la puissance d'un radiateur électrique pour un salon de 25m² bien isolé.">Conseil puissance chauffage</button>
+                <button type="button" class="chip-btn" data-prompt="Le client trouve le produit trop cher par rapport à un concurrent, comment rassurer ?">Objection prix</button>
+                <button type="button" class="chip-btn" data-prompt="SPECS : donne-moi le tableau des caractéristiques techniques et prérequis d'installation.">Demande SPECS</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1161,6 +1250,7 @@
     let inactivityTimer = null;
     let boostTimeoutTimer = null;
     let boostStepIndex = 0;
+    let complimentTypeTimer = null;
 
     if (window.marked) {
       marked.setOptions({ breaks: true, gfm: true });
@@ -1212,6 +1302,120 @@
       }
       return "Agent";
     }
+
+    /* ~5,000+ words combinatory compliment base with emojis & typing animation */
+    const COMPLIMENT_TRAITS = [
+      "rayonnant(e), vif/vive d'esprit et incroyablement efficace 🌟✨",
+      "solaire, précis(e) et prêt(e) à transformer chaque échange en réussite 🔥🚀",
+      "inspirant(e), attentif/attentive et d'une clarté remarquable 💡💎",
+      "plein(e) d'élan, fiable et redoutablement pertinent(e) dans tes conseils ⚡🎯",
+      "chaleureux/chaleureuse, posé(e) et capable de rassurer n'importe qui 🌈🤝",
+      "brillant(e), réactif/réactive et doté(e) d'un sens du service hors pair 🧠🏆",
+      "énergique, ingénieux/ingénieuse et toujours à la hauteur des défis 💪✨",
+      "apaisant(e), méthodique et d'une justesse exemplaire à chaque étape 🌿🧭",
+      "captivant(e), volontaire et animé(e) par une belle énergie positive 🎉💫",
+      "aiguisé(e), créatif/créative et précieux/précieuse pour toute l'équipe 🧩🌟",
+      "confiant(e), lucide et remarquablement doué(e) pour cerner l'essentiel 🔍🚀",
+      "dynamique, bienveillant(e) et capable d'apporter des réponses limpides 💬💎",
+      "affûté(e), engagé(e) et toujours prêt(e) à faire briller l'expérience client ⭐🔥",
+      "serein(e), perspicace et d'une efficacité qui force l'admiration 🎯🌿",
+      "audacieux/audacieuse, soigné(e) dans les détails et inspirant(e) au quotidien 🎨⚡",
+      "lumineux/lumineuse, disponible et d'une grande finesse d'analyse ☀️💡",
+      "déterminé(e), fluide dans l'échange et redoutablement malin/maline 🧠✨",
+      "charismatique, rigoureux/rigoureuse et porteur/porteuse d'une super dynamique 🚀🌈",
+      "inventif/inventive, attentif/attentive aux nuances et super inspirant(e) 💫🏆",
+      "au top de ta forme, précis(e) et prêt(e) à faire des étincelles aujourd'hui ⚡🎉"
+    ];
+
+    const COMPLIMENT_NUANCES = [
+      "avec ce petit supplément d'assurance qui rend tout plus fluide",
+      "et ta façon d'écouter fait déjà toute la différence dès les premières secondes",
+      "avec un regard clair qui simplifie même les demandes les plus techniques",
+      "et ton calme naturel donne immédiatement envie de te faire confiance",
+      "avec cette belle régularité qui marque positivement chaque conversation",
+      "et ta capacité à aller droit au but est un vrai atout aujourd'hui",
+      "avec une énergie communicatrice qui élève le niveau à chaque échange",
+      "et ton sens du détail évite les malentendus avant même qu'ils n'apparaissent",
+      "avec cette aisance qui transforme une simple question en vrai conseil",
+      "et ta bonne humeur discrète rend chaque interaction plus agréable",
+      "avec une vivacité d'esprit qui aide à trouver la bonne piste en un clin d'œil",
+      "et ta maîtrise du terrain rassure autant les clients que l'équipe",
+      "avec une belle souplesse face aux imprévus et une vraie force tranquille",
+      "et ta justesse de ton fait mouche à tous les coups",
+      "avec cette envie de bien faire qui se ressent dans chaque mot"
+    ];
+
+    function generateRandomCompliment() {
+      const recentKey = "specbot_recent_compliments";
+      let recent = [];
+      try {
+        recent = JSON.parse(localStorage.getItem(recentKey) || "[]");
+      } catch {}
+
+      let chosen = "";
+      let key = "";
+      for (let i = 0; i < 15; i++) {
+        const tIdx = Math.floor(Math.random() * COMPLIMENT_TRAITS.length);
+        const nIdx = Math.floor(Math.random() * COMPLIMENT_NUANCES.length);
+        key = `${tIdx}-${nIdx}`;
+        if (!recent.includes(key)) {
+          chosen = `${COMPLIMENT_TRAITS[tIdx]}, ${COMPLIMENT_NUANCES[nIdx]}`;
+          break;
+        }
+      }
+
+      if (!chosen) {
+        chosen = `${COMPLIMENT_TRAITS[0]}, ${COMPLIMENT_NUANCES[0]}`;
+      }
+
+      recent = [key, ...recent].slice(0, 40);
+      try {
+        localStorage.setItem(recentKey, JSON.stringify(recent));
+      } catch {}
+
+      return chosen;
+    }
+
+    function playComplimentTypingEffect(phrase) {
+      const nameEl = document.getElementById("complimentFirstName");
+      const textEl = document.getElementById("complimentPhraseText");
+      if (!nameEl || !textEl) return;
+
+      if (complimentTypeTimer) {
+        clearTimeout(complimentTypeTimer);
+        complimentTypeTimer = null;
+      }
+
+      nameEl.textContent = getFirstName();
+      textEl.textContent = "";
+      textEl.classList.add("typing-cursor");
+
+      const chars = Array.from(phrase);
+      let idx = 0;
+
+      function step() {
+        if (idx < chars.length) {
+          textEl.textContent += chars[idx];
+          idx++;
+          complimentTypeTimer = setTimeout(step, 22);
+        } else {
+          textEl.classList.remove("typing-cursor");
+        }
+      }
+
+      step();
+    }
+
+    function bindComplimentButton() {
+      const btn = document.getElementById("refreshComplimentBtn");
+      if (btn) {
+        btn.addEventListener("click", () => {
+          playComplimentTypingEffect(generateRandomCompliment());
+        });
+      }
+    }
+
+    bindComplimentButton();
 
     /* Interactive Toast Notification Engine with Animated Luminous Gradient Border */
     function showToast({ title, message, type = "info", duration = 6500, actions = [] }) {
@@ -1402,7 +1606,6 @@
       });
     }
 
-    /* Progressive scheduler: 3min -> 4min -> 5min -> 10min -> 15min -> 20min (repeating every 20min after) */
     function scheduleNextBoost() {
       stopBoostScheduler();
       if (!state.user) return;
@@ -1515,16 +1718,11 @@
       }, { passive: true });
     });
 
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible" && state.user) {
-        const last = Number(localStorage.getItem("specbot_last_activity") || "0");
-        if (last && Date.now() - last >= INACTIVITY_LIMIT_MS) {
-          triggerSleepLock();
-        }
-      }
-    });
+    /* Per-user conversation history & cross-tab sync */
+    const specbotChannel = typeof BroadcastChannel !== "undefined"
+      ? new BroadcastChannel("specbot_sync_channel")
+      : null;
 
-    /* Per-user conversation history persistence */
     function storageKeyForUser() {
       const email = (state.user?.email || "guest").toLowerCase();
       return `specbot_sessions_${email}`;
@@ -1545,7 +1743,53 @@
         localStorage.setItem(storageKeyForUser(), JSON.stringify(state.sessions.slice(0, 30)));
       } catch {}
       renderHistorySidebar();
+      if (specbotChannel && state.user && state.currentSessionId) {
+        specbotChannel.postMessage({
+          type: "SESSION_UPDATED",
+          email: state.user.email.toLowerCase(),
+          sessionId: state.currentSessionId
+        });
+      }
     }
+
+    function refreshActiveSessionFromStorage() {
+      if (!state.user) return;
+      loadUserSessions();
+      if (state.currentSessionId) {
+        const exists = state.sessions.some((s) => s.id === state.currentSessionId);
+        if (exists) {
+          openSavedSession(state.currentSessionId);
+        }
+      }
+    }
+
+    if (specbotChannel) {
+      specbotChannel.addEventListener("message", (event) => {
+        const data = event.data;
+        if (!data || data.type !== "SESSION_UPDATED") return;
+        if (state.user && data.email === state.user.email.toLowerCase()) {
+          refreshActiveSessionFromStorage();
+        }
+      });
+    }
+
+    window.addEventListener("storage", (event) => {
+      if (!state.user) return;
+      if (event.key === storageKeyForUser()) {
+        refreshActiveSessionFromStorage();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && state.user) {
+        const last = Number(localStorage.getItem("specbot_last_activity") || "0");
+        if (last && Date.now() - last >= INACTIVITY_LIMIT_MS) {
+          triggerSleepLock();
+          return;
+        }
+        refreshActiveSessionFromStorage();
+      }
+    });
 
     function saveCurrentTurnToSession(userMsg, botReply) {
       if (!state.currentSessionId) {
@@ -1659,6 +1903,7 @@
       appShell.classList.add("active");
       updateBadge();
       updateGreetingName();
+      playComplimentTypingEffect(generateRandomCompliment());
       loadUserSessions();
       resetInactivityTimer();
       startBoostScheduler();
@@ -1834,18 +2079,38 @@
     function resetConversation() {
       state.currentSessionId = null;
       state.history = [];
+      const firstName = getFirstName();
       messagesInner.innerHTML = `
-        <div class="greeting" id="greetingBlock">
-          <h2 id="greetingHeadline">Bonjour ${getFirstName()}, comment puis-je aider ?</h2>
-          <p>Colle un lien produit ManoMano, un EAN ou la question d'un client.</p>
-          <div class="quick-chips">
-            <button type="button" class="chip-btn" data-prompt="Le client hésite sur la puissance d'un radiateur électrique pour un salon de 25m² bien isolé.">Conseil puissance chauffage</button>
-            <button type="button" class="chip-btn" data-prompt="Le client trouve le produit trop cher par rapport à un concurrent, comment rassurer ?">Objection prix</button>
-            <button type="button" class="chip-btn" data-prompt="SPECS : donne-moi le tableau des caractéristiques techniques et prérequis d'installation.">Demande SPECS</button>
+        <div class="welcome-stack" id="greetingBlock">
+          <div class="intro-compliment-card">
+            <p class="intro-compliment-lead">
+              <span class="intro-compliment-strong">Avant de commencer, je voulais te dire :</span>
+              <span class="intro-compliment-strong" id="complimentFirstName">${firstName}</span>,
+              <span class="intro-compliment-strong">aujourd'hui tu es</span>
+              <span class="intro-compliment-dynamic typing-cursor" id="complimentPhraseText"></span><span class="intro-compliment-strong"> !</span>
+            </p>
+            <div class="intro-transition-row">
+              <span>Bon, passons aux choses sérieuses…</span>
+              <button type="button" class="refresh-compliment-btn" id="refreshComplimentBtn" title="Générer un autre compliment">
+                ✨ Autre compliment
+              </button>
+            </div>
+          </div>
+
+          <div class="greeting">
+            <h2 id="greetingHeadline">Bonjour ${firstName}, comment puis-je aider ?</h2>
+            <p>Colle un lien produit ManoMano, un EAN ou la question d'un client.</p>
+            <div class="quick-chips">
+              <button type="button" class="chip-btn" data-prompt="Le client hésite sur la puissance d'un radiateur électrique pour un salon de 25m² bien isolé.">Conseil puissance chauffage</button>
+              <button type="button" class="chip-btn" data-prompt="Le client trouve le produit trop cher par rapport à un concurrent, comment rassurer ?">Objection prix</button>
+              <button type="button" class="chip-btn" data-prompt="SPECS : donne-moi le tableau des caractéristiques techniques et prérequis d'installation.">Demande SPECS</button>
+            </div>
           </div>
         </div>
       `;
+      bindComplimentButton();
       bindQuickChips();
+      playComplimentTypingEffect(generateRandomCompliment());
       renderHistorySidebar();
     }
 
