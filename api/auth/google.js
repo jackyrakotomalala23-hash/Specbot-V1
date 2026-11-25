@@ -59,7 +59,7 @@ export default async function handler(req, res) {
       name: payload?.name || email,
       picture: payload?.picture || "",
       isAdmin: Boolean(adminEmail && email === adminEmail),
-      exp: Date.now() + 1000 * 60 * 60 * 24 * 7
+      exp: Date.now() + 1000 * 60 * 60 * 5
     };
 
     const token = signSession(userSession, sessionSecret);
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 
     res.setHeader(
       "Set-Cookie",
-      `specbot_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}${isHttps ? "; Secure" : ""}`
+      `specbot_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=18000${isHttps ? "; Secure" : ""}`
     );
 
     return res.status(200).json({
